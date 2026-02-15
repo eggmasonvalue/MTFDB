@@ -1,0 +1,56 @@
+name: Update Database
+
+on:
+  schedule:
+    - cron: '30 13 * * *' # 7:00 PM IST
+  workflow_dispatch:
+
+jobs:
+  update-db:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code Repo
+        uses: actions/checkout@v4
+        with:
+          repository: eggmasonvalue/mtfck
+          path: mtfck
+          # If private, needs token
+
+      - name: Checkout Database Repo
+        uses: actions/checkout@v4
+        with:
+          path: mtf_data
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup environment
+        run: |
+          # Replace empty submodule in code repo with actual checked out db repo
+          rm -rf mtfck/mtf_data
+          mv mtf_data mtfck/mtf_data
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        working-directory: mtfck
+        run: uv sync
+
+      - name: Run Update Script
+        working-directory: mtfck
+        run: uv run python scripts/update_db.py
+
+      - name: Commit and Push Changes
+        working-directory: mtfck/mtf_data
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add stock_data.duckdb schema.sql
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Auto-update database [skip ci]"
+            git push
+          fi
