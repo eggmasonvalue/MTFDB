@@ -17,22 +17,13 @@ def sync_sequence():
     # Sync sequence
     print(f"Syncing sequence to ensure it is > {max_id}")
     try:
-        # Check current value or just nextval
-        # Since nextval increments, we should just burn until we are > max_id
-        # To avoid burning unnecessary values if already ahead, we could try to peek.
-        # But DuckDB doesn't have currval across sessions easily without nextval first.
-        # We can just check `last_value` from `duckdb_sequences()`
-
         seq_info = conn.execute("SELECT last_value FROM duckdb_sequences() WHERE sequence_name='stock_id_seq'").fetchone()
         if seq_info:
-            current_val = seq_info[0]
+            current_val = seq_info[0] if seq_info[0] is not None else 0
             if current_val < max_id:
                 diff = max_id - current_val
                 print(f"Sequence lagging by {diff}. Fast-forwarding...")
                 # We can loop, or use nextval in a loop in SQL
-                # Or use `ALTER SEQUENCE` if it worked.
-                # Since ALTER failed, loop in Python or SQL
-                # SQL: SELECT nextval('stock_id_seq') FROM range(diff)
                 conn.execute(f"SELECT nextval('stock_id_seq') FROM range({diff})")
                 print(f"Sequence fast-forwarded to > {max_id}")
             else:
