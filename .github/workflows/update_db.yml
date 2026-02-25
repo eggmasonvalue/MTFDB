@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '30 13 * * *' # 7:00 PM IST
   workflow_dispatch:
+    inputs:
+      from_date:
+        description: 'Optional: Update from this date (YYYY-MM-DD)'
+        required: false
+        type: string
 
 jobs:
   update-db:
@@ -42,14 +47,19 @@ jobs:
 
       - name: Run Update Script
         working-directory: mtfck
-        run: mtfck update
+        run: |
+          if [ -n "${{ github.event.inputs.from_date }}" ]; then
+            mtfck update --from-date "${{ github.event.inputs.from_date }}"
+          else
+            mtfck update
+          fi
 
       - name: Commit and Push Changes
         working-directory: mtfck/mtf_data
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add stock_data.duckdb schema.sql
+          git add stock_data.parquet daily_summary.parquet
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
