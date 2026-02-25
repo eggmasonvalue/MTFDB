@@ -2,7 +2,7 @@ name: Update Database
 
 on:
   schedule:
-    - cron: '30 13 * * *' # 7:00 PM IST
+    - cron: '30 0 * * *' # 6:00 AM IST
   workflow_dispatch:
     inputs:
       from_date:
@@ -41,17 +41,15 @@ jobs:
 
       - name: Install dependencies and mtfck logic
         working-directory: mtfck
-        run: |
-          uv sync
-          uv pip install --system -e .
+        run: uv sync
 
       - name: Run Update Script
         working-directory: mtfck
         run: |
           if [ -n "${{ github.event.inputs.from_date }}" ]; then
-            mtfck update --from-date "${{ github.event.inputs.from_date }}"
+            uv run mtfck update --from-date "${{ github.event.inputs.from_date }}"
           else
-            mtfck update
+            uv run mtfck update
           fi
 
       - name: Commit and Push Changes
