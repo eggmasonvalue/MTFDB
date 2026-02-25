@@ -34,15 +34,15 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
-      - name: Install dependencies
+      - name: Install dependencies and mtfck logic
         working-directory: mtfck
-        run: uv sync
+        run: |
+          uv sync
+          uv pip install --system -e .
 
       - name: Run Update Script
         working-directory: mtfck
-        run: uv run python mtf_data/scripts/update_db.py
-        env:
-          PYTHONPATH: src
+        run: mtfck update
 
       - name: Commit and Push Changes
         working-directory: mtfck/mtf_data
