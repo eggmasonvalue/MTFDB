@@ -1,18 +1,9 @@
-CREATE SEQUENCE IF NOT EXISTS stock_id_seq;
-CREATE TABLE IF NOT EXISTS stock_master (
-    stock_id INTEGER PRIMARY KEY DEFAULT nextval('stock_id_seq'),
-    symbol TEXT UNIQUE,
-    name TEXT,
-    industry TEXT
-);
-
 CREATE TABLE IF NOT EXISTS stock_data (
     date DATE,
-    stock_id INTEGER,
+    symbol VARCHAR,
     qty_financed INTEGER,
     amt_financed REAL,
-    PRIMARY KEY (date, stock_id),
-    FOREIGN KEY(stock_id) REFERENCES stock_master(stock_id)
+    PRIMARY KEY (date, symbol)
 );
 
 CREATE TABLE IF NOT EXISTS daily_summary (
