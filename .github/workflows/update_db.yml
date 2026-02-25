@@ -45,11 +45,13 @@ jobs:
 
       - name: Run Update Script
         working-directory: mtfck
+        env:
+          PYTHONPATH: src
         run: |
           if [ -n "${{ github.event.inputs.from_date }}" ]; then
-            uv run mtfck update --from-date "${{ github.event.inputs.from_date }}"
+            uv run python -m mtfck.main update --from-date "${{ github.event.inputs.from_date }}"
           else
-            uv run mtfck update
+            uv run python -m mtfck.main update
           fi
 
       - name: Commit and Push Changes
