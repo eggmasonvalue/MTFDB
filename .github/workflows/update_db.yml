@@ -40,7 +40,9 @@ jobs:
 
       - name: Run Update Script
         working-directory: mtfck
-        run: uv run python scripts/update_db.py
+        run: uv run python mtf_data/scripts/update_db.py
+        env:
+          PYTHONPATH: src
 
       - name: Commit and Push Changes
         working-directory: mtfck/mtf_data
