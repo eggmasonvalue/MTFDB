@@ -47,12 +47,9 @@ jobs:
         working-directory: mtfck
         env:
           PYTHONPATH: src
+          FROM_DATE: ${{ github.event.inputs.from_date }}
         run: |
-          if [ -n "${{ github.event.inputs.from_date }}" ]; then
-            uv run python -m mtfck.main update --from-date "${{ github.event.inputs.from_date }}"
-          else
-            uv run python -m mtfck.main update
-          fi
+          uv run python -m mtfck.main update ${FROM_DATE:+--from-date "$FROM_DATE"}
 
       - name: Commit and Push Changes
         working-directory: mtfck/mtf_data
